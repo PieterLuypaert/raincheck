@@ -1,32 +1,35 @@
 #!/usr/bin/env python3
-"""buien: the rain for the next few hours in your terminal, from Buienradar.
+"""raincheck: the next hours of rain in your terminal, from Buienradar.
 
-  buien               the rain at home, live: the radar map plays the next two
-                      hours above the chart of the next three; the first
-                      time, buien asks where home is
-  buien gent          somewhere else
-  buien sint niklaas  a place name may be several words
-  buien 51.05,3.72    coordinates
-  buien work          a place you saved under a name of your own
-  buien --home gent   save Gent as home and show it right away
-  buien --save work brussel
-                      save Brussel as work, from then on: buien work
-  buien --search bergen
-                      list every Bergen and pick one, also with --home or
-                      --save to save the one you pick
-  buien --places      list your saved places, with --short only their names
-  buien --forget work forget a saved place
-  buien --trip 25     when to leave to stay dry on a 25-minute trip; with
-                      --short it exits with 2 when you cannot leave right now
-  buien --once        the map and the chart once, then back to the prompt
-  buien --live        the live screen, which plain buien opens in a terminal
-  buien --short       only the summary, for a status bar or prompt
-  buien --json        the forecast as JSON, for scripts
-  buien --color       colour even when the output is not a terminal, such as
-                      in watch -c buien --color; --no-color for none at all
-  buien --completions zsh
-                      tab completion for zsh, bash or fish, see the README
-  buien --version     the version of buien
+  raincheck               the rain at home, live: the radar map plays the
+                          next two hours above the chart of the next three;
+                          the first time, raincheck asks where home is
+  raincheck gent          somewhere else
+  raincheck sint niklaas  a place name may be several words
+  raincheck 51.05,3.72    coordinates
+  raincheck work          a place you saved under a name of your own
+  raincheck --home gent   save Gent as home and show it right away
+  raincheck --save work brussel
+                          save Brussel as work, from then on: raincheck work
+  raincheck --search bergen
+                          list every Bergen and pick one, also with --home
+                          or --save to save the one you pick
+  raincheck --places      list your saved places, with --short only names
+  raincheck --forget work forget a saved place
+  raincheck --trip 25     when to leave to stay dry on a 25-minute trip;
+                          with --short it exits with 2 when you cannot leave
+                          right now
+  raincheck --once        the map and the chart once, then back to the prompt
+  raincheck --live        the live screen, which plain raincheck opens in a
+                          terminal
+  raincheck --short       only the summary, for a status bar or prompt
+  raincheck --json        the forecast as JSON, for scripts
+  raincheck --color       colour even when the output is not a terminal,
+                          such as in watch -c raincheck --color; --no-color
+                          for none at all
+  raincheck --completions zsh
+                          tab completion for zsh, bash or fish, see the README
+  raincheck --version     the version of raincheck
 
 In the live screen the left and right arrows or the scroll wheel move
 through the hours and pause the map there, space plays it again, up and
@@ -34,10 +37,10 @@ down go through your saved places, / searches a place, s saves it, r
 fetches again and q quits. + and - zoom the map in and out around the
 place on screen, h, j, k and l or a drag with the mouse move it, and c
 brings it back to the place.
-Piped into another command, buien prints the chart as text.
+Piped into another command, raincheck prints the chart as text.
 
-Saved places, home among them, are kept in ~/.config/buien/places.json.
-A forecast is reused for five minutes from ~/.cache/buien, and shown from
+Saved places, home among them, are kept in ~/.config/raincheck/places.json.
+A forecast is reused for five minutes from ~/.cache/raincheck, and shown from
 there when Buienradar cannot be reached.
 Works in the Netherlands, Belgium and the border regions, as far as
 Buienradar's radar reaches. Colour is dropped with NO_COLOR or when the
@@ -76,7 +79,7 @@ except ImportError:  # Windows: everything but --live still works
 
 __version__ = "0.1.0"
 
-REPO_URL = "https://github.com/PieterLuypaert/buien"
+REPO_URL = "https://github.com/PieterLuypaert/raincheck"
 FORECAST_URL = "https://graphdata.buienradar.nl/2.0/forecast/geo/Rain3Hour?lat={lat:.2f}&lon={lon:.2f}"
 GEOCODE_URL = "https://geocoding-api.open-meteo.com/v1/search?"
 NEARBY_COUNTRIES = ("BE", "NL")
@@ -110,7 +113,7 @@ KINDS = [
 SHELLS = ("bash", "fish", "zsh")
 FLAGS = [
     Flag("-h", "--help", "every option"),
-    Flag("", "--version", "the version of buien"),
+    Flag("", "--version", "the version of raincheck"),
     Flag("", "--home", "save a place as home"),
     Flag("", "--save", "save a place under a name of your own"),
     Flag("", "--search", "list every match for a place and pick one"),
@@ -127,7 +130,7 @@ FLAGS = [
 ]
 
 
-class BuienError(Exception):
+class RaincheckError(Exception):
     pass
 
 
@@ -158,24 +161,24 @@ def fetch_json(url):
     try:
         return json.loads(data)
     except ValueError as error:
-        raise BuienError(f"no usable answer from {urllib.parse.urlsplit(url).hostname} ({error!r})") from error
+        raise RaincheckError(f"no usable answer from {urllib.parse.urlsplit(url).hostname} ({error!r})") from error
 
 
 def fetch_bytes(url):
     """What the server sends for url, or None when it answers 404."""
     host = urllib.parse.urlsplit(url).hostname
-    request = urllib.request.Request(url, headers={"User-Agent": f"buien/{__version__} (+{REPO_URL})"})
+    request = urllib.request.Request(url, headers={"User-Agent": f"raincheck/{__version__} (+{REPO_URL})"})
     try:
         with urllib.request.urlopen(request, timeout=10) as response:
             return response.read()
     except urllib.error.HTTPError as error:
         if error.code == 404:
             return None
-        raise BuienError(f"{host} answered with HTTP {error.code}") from error
+        raise RaincheckError(f"{host} answered with HTTP {error.code}") from error
     except urllib.error.URLError as error:
-        raise BuienError(f"{host} is unreachable ({error.reason})") from error
+        raise RaincheckError(f"{host} is unreachable ({error.reason})") from error
     except (OSError, ValueError, http.client.HTTPException) as error:
-        raise BuienError(f"no usable answer from {host} ({error!r})") from error
+        raise RaincheckError(f"no usable answer from {host} ({error!r})") from error
 
 
 PNG_SIGNATURE = b"\x89PNG\r\n\x1a\n"
@@ -185,7 +188,7 @@ Picture = namedtuple("Picture", "width height rows channels")
 def decode_png(data):
     """The rows of bytes of an 8-bit RGB or RGBA PNG without interlacing, the kind Buienradar sends."""
     if not data.startswith(PNG_SIGNATURE):
-        raise BuienError("Buienradar sent a radar image that is not a PNG")
+        raise RaincheckError("Buienradar sent a radar image that is not a PNG")
     header, compressed, position = None, bytearray(), len(PNG_SIGNATURE)
     while position + 8 <= len(data):
         length, kind = struct.unpack(">I4s", data[position:position + 8])
@@ -196,19 +199,19 @@ def decode_png(data):
             compressed += body
         position += 12 + length
     if header is None or header[2] != 8 or header[3] not in (2, 6) or header[6]:
-        raise BuienError("Buienradar sent a radar image buien cannot read")
+        raise RaincheckError("Buienradar sent a radar image raincheck cannot read")
     width, height, channels = header[0], header[1], 4 if header[3] == 6 else 3
     try:
         raw = zlib.decompress(bytes(compressed))
     except zlib.error as error:
-        raise BuienError(f"Buienradar sent a broken radar image ({error})") from error
+        raise RaincheckError(f"Buienradar sent a broken radar image ({error})") from error
     return Picture(width, height, unfilter(raw, width * channels, height, channels), channels)
 
 
 def unfilter(raw, stride, height, bpp):
     """The rows of a PNG image, each with its filter undone."""
     if len(raw) < (stride + 1) * height:
-        raise BuienError("Buienradar sent a radar image that ends too soon")
+        raise RaincheckError("Buienradar sent a radar image that ends too soon")
     rows, prior = [], bytearray(stride)
     for start in range(0, (stride + 1) * height, stride + 1):
         line = bytearray(raw[start + 1:start + 1 + stride])
@@ -234,7 +237,7 @@ def undo_filter(kind, line, prior, bpp):
             left, up = (line[i - bpp], prior[i - bpp]) if i >= bpp else (0, 0)
             line[i] = (line[i] + paeth(left, prior[i], up)) & 255
     elif kind:
-        raise BuienError(f"Buienradar sent a radar image with an unknown filter ({kind})")
+        raise RaincheckError(f"Buienradar sent a radar image with an unknown filter ({kind})")
 
 
 def paeth(left, up, corner):
@@ -334,7 +337,7 @@ def find_places(name):
     if not results and " " in name:
         results = search_places(name.replace(" ", "-"))
     if not results:
-        raise BuienError(f"no place found called '{name}'")
+        raise RaincheckError(f"no place found called '{name}'")
     return sorted(results, key=lambda result: result.get("country_code") not in NEARBY_COUNTRIES)
 
 
@@ -366,7 +369,7 @@ def choose_place(results):
     if not answer:
         return None
     if not answer.isdigit() or not 1 <= int(answer) <= len(places):
-        raise BuienError(f"pick a number from 1 to {len(places)}")
+        raise RaincheckError(f"pick a number from 1 to {len(places)}")
     return places[int(answer) - 1]
 
 
@@ -376,8 +379,8 @@ def search_places(name):
 
 
 def user_dir(variable, default):
-    """buien's own folder under an XDG base folder such as XDG_CONFIG_HOME."""
-    return Path(os.environ.get(variable) or Path.home() / default) / "buien"
+    """raincheck's own folder under an XDG base folder such as XDG_CONFIG_HOME."""
+    return Path(os.environ.get(variable) or Path.home() / default) / "raincheck"
 
 
 def places_file():
@@ -393,7 +396,7 @@ def load_places():
         data = json.loads(path.read_text(encoding="utf-8"))
         return {name: Place(place["name"], float(place["lat"]), float(place["lon"])) for name, place in data.items()}
     except (OSError, ValueError, KeyError, TypeError, AttributeError) as error:
-        raise BuienError(f"{path} is unreadable ({error!r}), fix it or remove it and save your places again") from error
+        raise RaincheckError(f"{path} is unreadable ({error!r}), fix it or remove it and save your places again") from error
 
 
 def write_places(places):
@@ -427,7 +430,7 @@ def remember_place(name, place):
     places = load_places()
     places[name] = place
     write_places(places)
-    shortcut = "plain buien" if name == HOME else f"buien {name}"
+    shortcut = "plain raincheck" if name == HOME else f"raincheck {name}"
     return f"{place.name} is saved as {name}, from now on {shortcut} is enough"
 
 
@@ -435,7 +438,7 @@ def forget_place(name):
     name = name.lower()
     places = load_places()
     if name not in places:
-        raise BuienError(f"no saved place called '{name}', see buien --places")
+        raise RaincheckError(f"no saved place called '{name}', see raincheck --places")
     del places[name]
     write_places(places)
     print(f"forgot {name}", file=sys.stderr)
@@ -444,7 +447,7 @@ def forget_place(name):
 def print_places(names_only=False):
     places = load_places()
     if not places and not names_only:
-        print("no saved places yet, save one with buien --home <place> or buien --save <name> <place>")
+        print("no saved places yet, save one with raincheck --home <place> or raincheck --save <name> <place>")
         return
     width = max(map(len, places), default=0)
     for name in home_first(places):
@@ -465,13 +468,13 @@ def matching_places(text):
 
 def ask_home():
     if not sys.stdin.isatty():
-        raise BuienError("no home saved yet, run buien --home <place> first")
+        raise RaincheckError("no home saved yet, run raincheck --home <place> first")
     try:
         name = input("Which place do you want the rain for by default? (e.g. Gent) ").strip()
     except EOFError:
         name = ""
     if not name:
-        raise BuienError("no place given")
+        raise RaincheckError("no place given")
     return save_place(HOME, lookup(name))
 
 
@@ -484,7 +487,7 @@ def resolve_place(options):
     text = " ".join(options.words)
     if options.search:
         if not text:
-            raise BuienError("say what to search for, e.g. buien --search bergen")
+            raise RaincheckError("say what to search for, e.g. raincheck --search bergen")
         return lookup(text, choose=True)
     if text:
         return load_places().get(text.lower()) or lookup(text)
@@ -495,15 +498,15 @@ def save_target(options):
     """The name to save under and the words of the place, for --home and --save."""
     if options.save:
         if len(options.words) < 2:
-            raise BuienError("say a name and a place, e.g. buien --save work brussel")
+            raise RaincheckError("say a name and a place, e.g. raincheck --save work brussel")
         return options.words[0], options.words[1:]
     if not options.words:
-        raise BuienError("say which place is home, e.g. buien --home gent")
+        raise RaincheckError("say which place is home, e.g. raincheck --home gent")
     return HOME, options.words
 
 
 def warn(message):
-    print(f"buien: {message}", file=sys.stderr)
+    print(f"raincheck: {message}", file=sys.stderr)
 
 
 def fetch_forecast(place, now, fresh=False, warn=warn):
@@ -515,10 +518,10 @@ def fetch_forecast(place, now, fresh=False, warn=warn):
             return ahead
     try:
         data = fetch_json(FORECAST_URL.format(lat=place.lat, lon=place.lon))
-    except BuienError as error:
+    except RaincheckError as error:
         return fall_back(cached, now, error, warn)
     if data is None:
-        raise BuienError(f"Buienradar has no radar for {place.name}, only for the Netherlands, Belgium and the border regions")
+        raise RaincheckError(f"Buienradar has no radar for {place.name}, only for the Netherlands, Belgium and the border regions")
     slots = parse_forecast(data, now)
     write_cache(place, now, data, warn)
     return slots
@@ -548,7 +551,7 @@ def read_cache(place):
         if fetched.tzinfo is None:
             return None
         return Cached(fetched, parse_slots(cached["data"]))
-    except (OSError, ValueError, KeyError, TypeError, BuienError):
+    except (OSError, ValueError, KeyError, TypeError, RaincheckError):
         return None
 
 
@@ -565,7 +568,7 @@ def prune_cache(folder, now):
     """Removes cached forecasts that no longer reach past now."""
     oldest = (now - CACHE_KEEP).timestamp()
     for path in folder.glob("*.json"):
-        with contextlib.suppress(FileNotFoundError):  # another buien may be pruning too
+        with contextlib.suppress(FileNotFoundError):  # another raincheck may be pruning too
             if path.stat().st_mtime < oldest:
                 path.unlink()
 
@@ -574,7 +577,7 @@ def parse_forecast(data, now):
     """The 5-minute slots from the one running at now on, in local time."""
     ahead = slots_ahead(parse_slots(data), now)
     if not ahead:
-        raise BuienError("Buienradar's forecast is out of date, try again in a moment")
+        raise RaincheckError("Buienradar's forecast is out of date, try again in a moment")
     return ahead
 
 
@@ -582,7 +585,7 @@ def parse_slots(data):
     try:
         return [Slot(utc_to_local(f["utcdatetime"]), float(f["precipitation"])) for f in data["forecasts"]]
     except (KeyError, TypeError, ValueError) as error:
-        raise BuienError(f"Buienradar sent an unexpected answer ({error!r})") from error
+        raise RaincheckError(f"Buienradar sent an unexpected answer ({error!r})") from error
 
 
 def slots_ahead(slots, now):
@@ -651,7 +654,7 @@ def plan_trip(slots, now, minutes):
     horizon = slots[-1].time + STEP
     if now + length > horizon:
         reach = int((horizon - now).total_seconds() // 60)
-        raise BuienError(f"the forecast reaches only until {clock(horizon)}, so a trip can take at most {reach} minutes")
+        raise RaincheckError(f"the forecast reaches only until {clock(horizon)}, so a trip can take at most {reach} minutes")
     for start in [now] + [slot.time for slot in slots if slot.time > now]:
         if start + length > horizon:
             break
@@ -870,19 +873,19 @@ def fetch_radar(width, height, forecast=RADAR_FRAMES):
     """Buienradar's rain radar of now and the forecast frames after it, ten minutes apart, at width x height pixels."""
     meta = fetch_json(RADAR_URL + urllib.parse.urlencode({"history": 1, "forecast": forecast, "skip": 1}))
     if meta is None:
-        raise BuienError("Buienradar has no radar map right now, try again in a moment")
+        raise RaincheckError("Buienradar has no radar map right now, try again in a moment")
     try:
         times = [utc_to_local(entry["timestamp"]) for entry in meta["times"]]
         url = sized(meta["sprite"], width, height)
     except (KeyError, TypeError, ValueError) as error:
-        raise BuienError(f"Buienradar sent an unexpected answer ({error!r})") from error
+        raise RaincheckError(f"Buienradar sent an unexpected answer ({error!r})") from error
     data = fetch_bytes(url)
     if data is None:
-        raise BuienError("Buienradar has no radar map right now, try again in a moment")
+        raise RaincheckError("Buienradar has no radar map right now, try again in a moment")
     picture = decode_png(data)
     count = min(len(times), picture.width // width)
     if picture.channels != 4 or picture.height != height or not count:
-        raise BuienError("Buienradar sent a radar map of an unexpected size")
+        raise RaincheckError("Buienradar sent a radar map of an unexpected size")
     stride = width * 4
     return [Frame(times[index], [row[index * stride:(index + 1) * stride] for row in picture.rows]) for index in range(count)]
 
@@ -1054,7 +1057,7 @@ def snapshot_map(place, size, color):
     """The radar of now with your places on it, at size; nothing when Buienradar gives none."""
     try:
         frames = fetch_radar(*size, forecast=0)
-    except BuienError as error:
+    except RaincheckError as error:
         warn(f"no radar map ({error})")
         return []
     return render_map(frames[0], datetime.now().astimezone(), saved_marks(place), Paint(color))
@@ -1189,7 +1192,7 @@ class Radar:
         self.tried = (viewport, zoom)
         try:
             frames = self.fetch(viewport[0] * zoom, viewport[1] * zoom)
-        except BuienError as error:
+        except RaincheckError as error:
             self.error, self.retry_at = error, now + RADAR_RETRY
             if not (isinstance(self.frames, list) and self.viewport == viewport):
                 self.frames, self.viewport, self.zoom = error, viewport, zoom
@@ -1221,7 +1224,7 @@ class Prompt:
 
 
 class Live:
-    """What buien --live shows: a tab per place, a cursor over the chart, and a prompt or a menu when asked."""
+    """What raincheck --live shows: a tab per place, a cursor over the chart, and a prompt or a menu when asked."""
 
     def __init__(self, tabs, trip_minutes=None, fetch=None, search=None, radar=None):
         self.tabs = tabs
@@ -1278,7 +1281,7 @@ class Live:
         notes = []
         try:
             slots = self.fetch(self.tab.place, now, fresh=self.fresh, warn=notes.append)
-        except BuienError as error:
+        except RaincheckError as error:
             self.loaded[self.index] = Loaded(now, error)
         else:
             trip = self.plan_trip(slots, now, notes)
@@ -1293,7 +1296,7 @@ class Live:
             return None
         try:
             return plan_trip(slots, now, self.trip_minutes)
-        except BuienError as error:
+        except RaincheckError as error:
             notes.append(str(error))
             return None
 
@@ -1461,7 +1464,7 @@ class Live:
                 self.save(text)
                 return
             found = self.search(text)
-        except (BuienError, OSError) as error:
+        except (RaincheckError, OSError) as error:
             self.message = str(error)
             return
         if len(found) == 1:
@@ -1533,7 +1536,7 @@ class Live:
         loaded = self.loaded.get(self.index)
         if loaded is None:
             return ["", f"  {paint.dim('fetching the forecast')}"]
-        if isinstance(loaded.slots, BuienError):
+        if isinstance(loaded.slots, RaincheckError):
             return ["", f"  {paint.bold(self.tab.place.name)}", "", f"  {loaded.slots}"]
         cursor = min(self.cursor, len(loaded.slots) - 1)
         return render(self.tab.place, loaded.slots, now, paint.enabled, width, loaded.trip, cursor).split("\n")
@@ -1545,7 +1548,7 @@ class Live:
             return []
         if frames is None:
             return ["", f"  {paint.dim('fetching the radar')}"]
-        if isinstance(frames, BuienError):
+        if isinstance(frames, RaincheckError):
             return ["", f"  {paint.bold('Radar')} {paint.dim(str(frames))}"]
         index = self.frame_index()
         marks = tuple(Mark(tab.label, tab.place, number == self.index) for number, tab in enumerate(self.tabs))
@@ -1568,13 +1571,13 @@ class Live:
 
 
 def live_mode(options):
-    """buien --live: the chart full screen and kept up to date, a tab for every saved place."""
+    """raincheck --live: the chart full screen and kept up to date, a tab for every saved place."""
     if options.short or options.as_json:
-        raise BuienError("--live shows the chart, so it goes without --short and --json")
+        raise RaincheckError("--live shows the chart, so it goes without --short and --json")
     if termios is None:
-        raise BuienError("--live needs a Unix terminal, such as on macOS or Linux")
+        raise RaincheckError("--live needs a Unix terminal, such as on macOS or Linux")
     if not (sys.stdin.isatty() and sys.stdout.isatty()):
-        raise BuienError("--live needs a terminal")
+        raise RaincheckError("--live needs a terminal")
     place = resolve_place(options)
     if place is None:
         return 0
@@ -1651,10 +1654,10 @@ def live_loop(live, terminal, color):
 
 
 def completion_script(shell):
-    """The script that teaches a shell buien's options and your saved places."""
+    """The script that teaches a shell raincheck's options and your saved places."""
     scripts = {"bash": bash_completion, "fish": fish_completion, "zsh": zsh_completion}
     if shell not in scripts:
-        raise BuienError(f"say which shell to complete for: {', '.join(SHELLS)}")
+        raise RaincheckError(f"say which shell to complete for: {', '.join(SHELLS)}")
     return scripts[shell]()
 
 
@@ -1664,15 +1667,15 @@ def zsh_completion():
         for name in filter(None, (flag.short, flag.long)):
             specs.append(f"    '{name}[{flag.about}]{zsh_value(flag)}' \\")
     return "\n".join([
-        "#compdef buien",
-        "_buien() {",
+        "#compdef raincheck",
+        "_raincheck() {",
         "  local -a places",
-        '  places=(${(f)"$(buien --places --short 2>/dev/null)"})',
+        '  places=(${(f)"$(raincheck --places --short 2>/dev/null)"})',
         "  _arguments \\",
         *specs,
         "    '*:place:compadd -a places'",
         "}",
-        'if [[ "$funcstack[1]" == _buien ]]; then _buien "$@"; else compdef _buien buien; fi',
+        'if [[ "$funcstack[1]" == _raincheck ]]; then _raincheck "$@"; else compdef _raincheck raincheck; fi',
     ])
 
 
@@ -1691,7 +1694,7 @@ def bash_completion():
             choices = " ".join(flag.choices)
             arms.append(f'    {flag.long}) COMPREPLY=($(compgen -W "{choices}" -- "$cur")); return ;;')
     return "\n".join([
-        "_buien() {",
+        "_raincheck() {",
         '  local cur="${COMP_WORDS[COMP_CWORD]}"',
         '  case "${COMP_WORDS[COMP_CWORD-1]}" in',
         *arms,
@@ -1700,20 +1703,20 @@ def bash_completion():
         f'    COMPREPLY=($(compgen -W "{names}" -- "$cur"))',
         "  else",
         "    local IFS=$'\\n'",
-        '    COMPREPLY=($(compgen -W "$(buien --places --short 2>/dev/null)" -- "$cur"))',
+        '    COMPREPLY=($(compgen -W "$(raincheck --places --short 2>/dev/null)" -- "$cur"))',
         "  fi",
         "}",
-        "complete -F _buien buien",
+        "complete -F _raincheck raincheck",
     ])
 
 
 def fish_completion():
-    lines = ["complete -c buien -f"]
+    lines = ["complete -c raincheck -f"]
     for flag in FLAGS:
         short = f" -s {flag.short[1:]}" if flag.short else ""
         arguments = f" -x -a '{' '.join(flag.choices)}'" if flag.choices else " -x" if flag.value else ""
-        lines.append(f"complete -c buien{short} -l {flag.long[2:]}{arguments} -d '{flag.about}'")
-    lines.append("complete -c buien -a '(buien --places --short 2>/dev/null)' -d 'saved place'")
+        lines.append(f"complete -c raincheck{short} -l {flag.long[2:]}{arguments} -d '{flag.about}'")
+    lines.append("complete -c raincheck -a '(raincheck --places --short 2>/dev/null)' -d 'saved place'")
     return "\n".join(lines)
 
 
@@ -1759,7 +1762,7 @@ def parse_args(argv):
         elif arg == "--once":
             options.once = True
         elif arg.startswith("-") and not COORDS.match(arg):
-            raise BuienError(f"unknown option {arg}, see buien -h")
+            raise RaincheckError(f"unknown option {arg}, see raincheck -h")
         else:
             options.words.append(arg)
     return options
@@ -1767,7 +1770,7 @@ def parse_args(argv):
 
 def parse_minutes(text):
     if not (text.isascii() and text.isdigit()) or not 0 < int(text) <= 9999:
-        raise BuienError("say how many minutes the trip takes, e.g. buien --trip 25")
+        raise RaincheckError("say how many minutes the trip takes, e.g. raincheck --trip 25")
     return int(text)
 
 
@@ -1776,7 +1779,7 @@ def run(options):
         print(__doc__.strip())
         return 0
     if options.version:
-        print(f"buien {__version__}")
+        print(f"raincheck {__version__}")
         return 0
     if options.completions is not None:
         print(completion_script(options.completions))
@@ -1786,7 +1789,7 @@ def run(options):
         return 0
     if options.forget:
         if not options.words:
-            raise BuienError("say which place to forget, e.g. buien --forget work")
+            raise RaincheckError("say which place to forget, e.g. raincheck --forget work")
         forget_place(" ".join(options.words))
         return 0
     if wants_live(options):
@@ -1802,7 +1805,7 @@ def run(options):
 
 
 def wants_live(options):
-    """--live, or plain buien in a terminal; --once, --short, --json and a pipe get text."""
+    """--live, or plain raincheck in a terminal; --once, --short, --json and a pipe get text."""
     if options.live:
         return True
     if options.once or options.short or options.as_json:
@@ -1827,8 +1830,8 @@ def show(options, place, slots, now, trip):
 def main(argv=None):
     try:
         return run(parse_args(sys.argv[1:] if argv is None else argv))
-    except BuienError as error:
-        print(f"buien: {error}", file=sys.stderr)
+    except RaincheckError as error:
+        print(f"raincheck: {error}", file=sys.stderr)
         return 1
     except KeyboardInterrupt:
         print(file=sys.stderr)

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Prints MAP_MASK for buien: sea, the two land colours and the borders of Buienradar's radar map.
+"""Prints MAP_MASK for raincheck: sea, the two land colours and the borders of Buienradar's radar map.
 
   tools/make-map-mask.py background.png
 
@@ -19,19 +19,19 @@ import sys
 import zlib
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-_loader = importlib.machinery.SourceFileLoader("buien", os.path.join(HERE, "..", "buien"))
-buien = importlib.util.module_from_spec(importlib.util.spec_from_loader("buien", _loader))
-_loader.exec_module(buien)
+_loader = importlib.machinery.SourceFileLoader("raincheck", os.path.join(HERE, "..", "raincheck"))
+raincheck = importlib.util.module_from_spec(importlib.util.spec_from_loader("raincheck", _loader))
+_loader.exec_module(raincheck)
 
 DOT_SIZE = 9
 
 
 def classify(red, green, blue):
     if blue > 100 and green < 80:
-        return buien.SEA
+        return raincheck.SEA
     if red > 150 and green > 150 and blue < 100:
-        return buien.BORDER
-    return buien.LAND_DARK if green < 150 else buien.LAND_LIGHT
+        return raincheck.BORDER
+    return raincheck.LAND_DARK if green < 150 else raincheck.LAND_LIGHT
 
 
 def classes_of(picture):
@@ -48,7 +48,7 @@ def drop_dots(grid):
     seen = set()
     for y in range(height):
         for x in range(width):
-            if grid[y][x] != buien.BORDER or (x, y) in seen:
+            if grid[y][x] != raincheck.BORDER or (x, y) in seen:
                 continue
             blob = flood(grid, x, y, seen)
             xs, ys = [px for px, _ in blob], [py for _, py in blob]
@@ -65,7 +65,7 @@ def flood(grid, x, y, seen):
         px, py = todo.pop()
         blob.append((px, py))
         for nx, ny in ((px + 1, py), (px - 1, py), (px, py + 1), (px, py - 1)):
-            if 0 <= ny < len(grid) and 0 <= nx < len(grid[0]) and (nx, ny) not in seen and grid[ny][nx] == buien.BORDER:
+            if 0 <= ny < len(grid) and 0 <= nx < len(grid[0]) and (nx, ny) not in seen and grid[ny][nx] == raincheck.BORDER:
                 seen.add((nx, ny))
                 todo.append((nx, ny))
     return blob
@@ -75,17 +75,17 @@ def surrounding_land(grid, blob):
     counts = {}
     for px, py in blob:
         for nx, ny in ((px + 1, py), (px - 1, py), (px, py + 1), (px, py - 1)):
-            if 0 <= ny < len(grid) and 0 <= nx < len(grid[0]) and grid[ny][nx] != buien.BORDER:
+            if 0 <= ny < len(grid) and 0 <= nx < len(grid[0]) and grid[ny][nx] != raincheck.BORDER:
                 counts[grid[ny][nx]] = counts.get(grid[ny][nx], 0) + 1
-    return max(counts, key=counts.get) if counts else buien.LAND_LIGHT
+    return max(counts, key=counts.get) if counts else raincheck.LAND_LIGHT
 
 
 def main(path):
     with open(path, "rb") as file:
-        grid = classes_of(buien.decode_png(file.read()))
+        grid = classes_of(raincheck.decode_png(file.read()))
     drop_dots(grid)
-    width, height = buien.MAP_MASK_SIZE
-    small = buien.shrink_mask(grid, width, height)
+    width, height = raincheck.MAP_MASK_SIZE
+    small = raincheck.shrink_mask(grid, width, height)
     packed = bytearray()
     flat = [value for row in small for value in row]
     for start in range(0, len(flat), 4):

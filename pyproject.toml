@@ -3,7 +3,7 @@ requires = ["setuptools>=77"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "buien"
+name = "raincheck"
 version = "0.1.0"
 description = "The rain for the next three hours as a chart in your terminal, from Buienradar"
 readme = "README.md"
@@ -20,10 +20,10 @@ classifiers = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/PieterLuypaert/buien"
+Homepage = "https://github.com/PieterLuypaert/raincheck"
 
 [tool.setuptools]
-# buien stays one file without .py, so the curl install keeps working
-script-files = ["buien"]
+# raincheck stays one file without .py, so the curl install keeps working
+script-files = ["raincheck"]
 py-modules = []
 packages = []
