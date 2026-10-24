@@ -26,4 +26,4 @@ jobs:
       - name: Installs as a tool
         run: |
           uv tool install .
-          "$(uv tool dir --bin)/buien" --version
+          "$(uv tool dir --bin)/raincheck" --version

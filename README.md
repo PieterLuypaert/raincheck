@@ -1,39 +1,41 @@
-# buien
+# raincheck
 
-Should I cycle now? `buien` fills your terminal with Buienradar's rain radar, playing the next two hours over a map of the Low Countries with your places on it. Below the map is a chart of the rain at your place for the next three hours, with a summary such as "dry until 14:20, then 15 min of light rain". It works in the Netherlands, Belgium and the border regions.
+Should I cycle now? `raincheck` fills your terminal with Buienradar's rain radar, playing the next two hours over a map of the Low Countries with your places on it. Below the map is a chart of the rain at your place for the next three hours, with a summary such as "dry until 14:20, then 15 min of light rain". It works in the Netherlands, Belgium and the border regions.
 
 ## Install
 
 With [uv](https://docs.astral.sh/uv/) or [pipx](https://pipx.pypa.io/):
 
 ```sh
-uv tool install git+https://github.com/PieterLuypaert/buien
-pipx install git+https://github.com/PieterLuypaert/buien
+uv tool install git+https://github.com/PieterLuypaert/raincheck
+pipx install git+https://github.com/PieterLuypaert/raincheck
 ```
 
-Update with `uv tool upgrade buien` or `pipx upgrade buien`.
+Update with `uv tool upgrade raincheck` or `pipx upgrade raincheck`.
 
-Or as one file, since buien needs nothing but `python3` (3.9 or newer):
+Or as one file, since raincheck needs nothing but `python3` (3.9 or newer):
 
 ```sh
 mkdir -p ~/.local/bin
-curl -fsSL https://raw.githubusercontent.com/PieterLuypaert/buien/main/buien -o ~/.local/bin/buien
-chmod +x ~/.local/bin/buien
+curl -fsSL https://raw.githubusercontent.com/PieterLuypaert/raincheck/main/raincheck -o ~/.local/bin/raincheck
+chmod +x ~/.local/bin/raincheck
 ```
 
-Run `buien`, or `buien -h` for every option. The first time, buien asks where home is.
+Run `raincheck`, or `raincheck -h` for every option. The first time, raincheck asks where home is.
+
+raincheck used to be called buien. Installed it under that name? Install it again as raincheck: the first time it runs, it moves your saved places over.
 
 ## When to leave
 
-`buien --trip 25` tells you when to leave to stay dry on a 25-minute ride, such as "leave between 15:20 and 15:30 to stay dry for 25 min", and draws that dry stretch in green on the chart's time axis. With `--short` it exits with 0 when you can leave right now and with 2 when you cannot, so a script can decide for you:
+`raincheck --trip 25` tells you when to leave to stay dry on a 25-minute ride, such as "leave between 15:20 and 15:30 to stay dry for 25 min", and draws that dry stretch in green on the chart's time axis. With `--short` it exits with 0 when you can leave right now and with 2 when you cannot, so a script can decide for you:
 
 ```sh
-buien --trip 20 --short >/dev/null && echo "go now" || echo "wait a bit"
+raincheck --trip 20 --short >/dev/null && echo "go now" || echo "wait a bit"
 ```
 
 ## The live screen
 
-Plain `buien`, or `buien gent` for somewhere else, opens the live screen with a tab for every saved place. The map plays the radar's next two hours, and the cursor in the chart moves along with it. On a wide terminal the map sits beside the chart, otherwise above it. Everything refreshes by itself: the forecast every minute, the radar every five.
+Plain `raincheck`, or `raincheck gent` for somewhere else, opens the live screen with a tab for every saved place. The map plays the radar's next two hours, and the cursor in the chart moves along with it. On a wide terminal the map sits beside the chart, otherwise above it. Everything refreshes by itself: the forecast every minute, the radar every five.
 
 | Key | Does |
 | --- | --- |
@@ -47,26 +49,26 @@ Plain `buien`, or `buien gent` for somewhere else, opens the live screen with a 
 | r | fetch the forecast and the radar again, past the cache |
 | q or esc | quit |
 
-With `--trip 25` it also says when to leave, for whichever place is on screen. In a short terminal the map makes way for the chart. buien takes the scroll wheel, so to select text, hold the modifier your terminal uses for that, such as Option or Shift.
+With `--trip 25` it also says when to leave, for whichever place is on screen. In a short terminal the map makes way for the chart. raincheck takes the scroll wheel, so to select text, hold the modifier your terminal uses for that, such as Option or Shift.
 
-Zoomed in, buien asks Buienradar for the radar that much bigger, so the rain stays as sharp as Buienradar has it rather than growing into blocks. The map is Buienradar's own radar over a map of the area it covers. The radar of now lags the clock by about ten minutes, which the title says, and the frames after it are Buienradar's forecast. The kinds of rain on the map follow Buienradar's colours roughly; the chart has the exact amounts for your place.
+Zoomed in, raincheck asks Buienradar for the radar that much bigger, so the rain stays as sharp as Buienradar has it rather than growing into blocks. The map is Buienradar's own radar over a map of the area it covers. The radar of now lags the clock by about ten minutes, which the title says, and the frames after it are Buienradar's forecast. The kinds of rain on the map follow Buienradar's colours roughly; the chart has the exact amounts for your place.
 
-`buien --once` prints the map of now and the chart once and gives you the prompt back. Piped into another command, buien prints the chart as plain text.
+`raincheck --once` prints the map of now and the chart once and gives you the prompt back. Piped into another command, raincheck prints the chart as plain text.
 
 ## Tab completion
 
-buien completes its options and your saved places. Add the line for your shell to its startup file:
+raincheck completes its options and your saved places. Add the line for your shell to its startup file:
 
 ```sh
-eval "$(buien --completions zsh)"     # ~/.zshrc, after compinit
-eval "$(buien --completions bash)"    # ~/.bashrc
-buien --completions fish > ~/.config/fish/completions/buien.fish
+eval "$(raincheck --completions zsh)"     # ~/.zshrc, after compinit
+eval "$(raincheck --completions bash)"    # ~/.bashrc
+raincheck --completions fish > ~/.config/fish/completions/raincheck.fish
 ```
 
 ## In a status bar or a script
 
-`buien --short` prints only the summary and `buien --json` the whole forecast. A forecast is reused for five minutes, so a status bar may run buien as often as it likes. In tmux, for example:
+`raincheck --short` prints only the summary and `raincheck --json` the whole forecast. A forecast is reused for five minutes, so a status bar may run raincheck as often as it likes. In tmux, for example:
 
 ```tmux
-set -g status-right '#(buien --short)'
+set -g status-right '#(raincheck --short)'
 ```
