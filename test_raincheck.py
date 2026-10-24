@@ -1521,6 +1521,42 @@ class CommandTest(unittest.TestCase):
         self.assertIn("dry until 12:35, then 5 min of light rain", out)
 
 
+class FolderFromBeforeTheRenameTest(unittest.TestCase):
+    """raincheck was called buien; its saved places must survive the new name."""
+
+    def setUp(self):
+        config = tempfile.TemporaryDirectory()
+        self.addCleanup(config.cleanup)
+        self.base = config.name
+        mock.patch.dict(os.environ, {"XDG_CONFIG_HOME": config.name}).start()
+        self.addCleanup(mock.patch.stopall)
+
+    def write(self, folder, places):
+        os.makedirs(os.path.join(self.base, folder))
+        with open(os.path.join(self.base, folder, "places.json"), "w") as file:
+            json.dump(places, file)
+
+    def test_places_saved_as_buien_move_over(self):
+        self.write("buien", {"home": "kept"})
+
+        path = raincheck.places_file()
+
+        self.assertEqual(str(path), os.path.join(self.base, "raincheck", "places.json"))
+        with open(path) as file:
+            self.assertEqual(json.load(file), {"home": "kept"})
+        self.assertFalse(os.path.exists(os.path.join(self.base, "buien")))
+
+    def test_a_raincheck_folder_wins_over_an_old_one(self):
+        self.write("buien", {"home": "old"})
+        self.write("raincheck", {"home": "new"})
+
+        path = raincheck.places_file()
+
+        with open(path) as file:
+            self.assertEqual(json.load(file), {"home": "new"})
+        self.assertTrue(os.path.exists(os.path.join(self.base, "buien")))
+
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -23,6 +23,8 @@ chmod +x ~/.local/bin/raincheck
 
 Run `raincheck`, or `raincheck -h` for every option. The first time, raincheck asks where home is.
 
+raincheck used to be called buien. Installed it under that name? Install it again as raincheck: the first time it runs, it moves your saved places over.
+
 ## When to leave
 
 `raincheck --trip 25` tells you when to leave to stay dry on a 25-minute ride, such as "leave between 15:20 and 15:30 to stay dry for 25 min", and draws that dry stretch in green on the chart's time axis. With `--short` it exits with 0 when you can leave right now and with 2 when you cannot, so a script can decide for you:

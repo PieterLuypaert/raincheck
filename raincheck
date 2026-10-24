@@ -379,8 +379,19 @@ def search_places(name):
 
 
 def user_dir(variable, default):
-    """raincheck's own folder under an XDG base folder such as XDG_CONFIG_HOME."""
-    return Path(os.environ.get(variable) or Path.home() / default) / "raincheck"
+    """raincheck's own folder under an XDG base folder such as XDG_CONFIG_HOME.
+
+    raincheck was called buien, so a folder left under that name moves over the first time.
+    """
+    base = Path(os.environ.get(variable) or Path.home() / default)
+    folder, old = base / "raincheck", base / "buien"
+    if not folder.exists() and old.is_dir():
+        try:
+            old.rename(folder)
+        except OSError:
+            if not folder.exists():  # another raincheck may have just moved it
+                return old
+    return folder
 
 
 def places_file():
