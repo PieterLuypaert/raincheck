@@ -4,7 +4,7 @@ Should I cycle now? `raincheck` fills your terminal with Buienradar's rain radar
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/live-dark.png">
-  <img alt="raincheck's live screen: the radar map of the Low Countries with home, gent and work on it, beside the chart of the rain in Aarlen for the next three hours" src="docs/screenshots/live-light.png">
+  <img alt="raincheck's live screen: the radar map of the Low Countries with Aarlen on it, beside the chart of the rain in Aarlen for the next three hours" src="docs/screenshots/live-light.png">
 </picture>
 
 ## Install
