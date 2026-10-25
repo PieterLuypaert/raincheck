@@ -1,6 +1,11 @@
 # raincheck
 
-Should I cycle now? `raincheck` fills your terminal with Buienradar's rain radar, playing the next two hours over a map of the Low Countries with your places on it. Below the map is a chart of the rain at your place for the next three hours, with a summary such as "dry until 14:20, then 15 min of light rain". It works in the Netherlands, Belgium and the border regions.
+Should I cycle now? `raincheck` fills your terminal with Buienradar's rain radar, playing the next two hours over a map of the Low Countries with your places on it. Beside the map, or below it on a narrow terminal, is a chart of the rain at your place for the next three hours, with a summary such as "dry until 14:20, then 15 min of light rain". It works in the Netherlands, Belgium and the border regions.
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/live-dark.png">
+  <img alt="raincheck's live screen: the radar map of the Low Countries with home, gent and work on it, beside the chart of the rain in Aarlen for the next three hours" src="docs/screenshots/live-light.png">
+</picture>
 
 ## Install
 
@@ -33,6 +38,11 @@ raincheck used to be called buien. Installed it under that name? Install it agai
 raincheck --trip 20 --short >/dev/null && echo "go now" || echo "wait a bit"
 ```
 
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/trip-dark.png">
+  <img alt="The chart for Aarlen with raincheck --trip 25: the dry stretch drawn in green on the time axis, and leave by 21:45 to stay dry for 25 min" src="docs/screenshots/trip-light.png">
+</picture>
+
 ## The live screen
 
 Plain `raincheck`, or `raincheck gent` for somewhere else, opens the live screen with a tab for every saved place. The map plays the radar's next two hours, and the cursor in the chart moves along with it. On a wide terminal the map sits beside the chart, otherwise above it. Everything refreshes by itself: the forecast every minute, the radar every five.
@@ -52,6 +62,11 @@ Plain `raincheck`, or `raincheck gent` for somewhere else, opens the live screen
 With `--trip 25` it also says when to leave, for whichever place is on screen. In a short terminal the map makes way for the chart. raincheck takes the scroll wheel, so to select text, hold the modifier your terminal uses for that, such as Option or Shift.
 
 Zoomed in, raincheck asks Buienradar for the radar that much bigger, so the rain stays as sharp as Buienradar has it rather than growing into blocks. The map is Buienradar's own radar over a map of the area it covers. The radar of now lags the clock by about ten minutes, which the title says, and the frames after it are Buienradar's forecast. The kinds of rain on the map follow Buienradar's colours roughly; the chart has the exact amounts for your place.
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/zoom-dark.png">
+  <img alt="The radar map zoomed in twice around Aarlen, with the rain as sharp as Buienradar has it" src="docs/screenshots/zoom-light.png">
+</picture>
 
 `raincheck --once` prints the map of now and the chart once and gives you the prompt back. Piped into another command, raincheck prints the chart as plain text.
 
